@@ -1,4 +1,4 @@
-const Sequelize = require("sequelize");
+import Sequelize from "sequelize";
 const sequelize = new Sequelize("postgres://postgres:postgres@localhost:5432/crud", { dialect: "postgres" });
 
-module.exports = sequelize;
+export default sequelize;
