@@ -1,50 +1,49 @@
-import pkg from "body-parser";
+// Importando os módulos necessários
 import express from "express";
 import helmet from "helmet";
-import http from "node:http";
-import { PORT } from "./config.js";
-import { generateUsers } from "./utils/utils.js";
+import { PORT } from "./config/config.js";
+import sequelize from "./db.js";
+import routes from "./routes.js";
 
-const { json, urlencoded } = pkg;
-export const app = express();
-const server = http.createServer(app);
+// Criando uma instância do aplicativo Express
+const app = express();
 
-app.use(express.json());
+// Middleware: Configurando o uso do módulo Helmet para melhorar a segurança do aplicativo
 app.use(helmet());
-app.use(json());
-app.use(urlencoded({ extended: true }));
 
-app.use((_req, res, next) => {
+// Middleware: Habilitando o parser de JSON para lidar com dados JSON nas requisições
+app.use(express.json());
+
+// Middleware: Habilitando o parser de dados enviados através de formulários (x-www-form-urlencoded)
+app.use(express.urlencoded({ extended: true }));
+
+// Middleware: Configurando o cabeçalho CORS para permitir requisições de qualquer origem (*), com quaisquer métodos (*),
+// e especificando quais cabeçalhos podem ser usados na requisição
+app.use((req, res, next) => {
   res.setHeader("Access-Control-Allow-Origin", "*");
-  res.setHeader("Access-Control-Allow-Header", "Content-Type, Authorization, X-Requested-With, Accept");
   res.setHeader("Access-Control-Allow-Methods", "*");
+  res.setHeader("Access-Control-Allow-Headers", "X-Request-With, Content-Type, Accept");
   next();
 });
 
-server.listen(PORT, (err) => {
+// Middleware: Configurando as rotas do aplicativo, agrupadas no módulo routes
+app.use(routes);
+
+// Iniciando o servidor para escutar na porta especificada
+app.listen(PORT, (err) => {
   if (err) {
-    console.error(err);
+    console.error("Erro ao iniciar o servidor:", err);
+  } else {
+    console.log(`Servidor está rodando na porta ${PORT}`);
   }
-
-  console.log(`Server started on port ${PORT}`);
 });
 
-app.options("*", (_req, res) => {
-  res.send(200);
-});
-
-app.get("/list", (_req, res) => {
-  res.send(generateUsers(10));
-});
-
-app.post("/create", (req, res) => {
-  res.send({ ...req.body });
-});
-
-app.put("/update", (req, res) => {
-  res.send({ ...req.body });
-});
-
-app.delete("/delete", (req, res) => {
-  res.send({ ...req.body });
-});
+// Iniciando a conexão com o banco de dados
+sequelize.sync().then(
+  () => {
+    console.log("Conectado ao banco de dados");
+  },
+  (error) => {
+    console.error("Erro ao conectar ao banco de dados");
+  }
+);

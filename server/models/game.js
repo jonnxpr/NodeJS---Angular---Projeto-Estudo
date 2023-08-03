@@ -1,7 +1,7 @@
 import { DATE, INTEGER, STRING } from "sequelize";
-import { define } from "../db.js";
+import sequelize from "../db.js";
 
-const User = define("user", {
+const Game = sequelize.define("game", {
   id: {
     type: INTEGER,
     autoIncrement: true,
@@ -9,20 +9,15 @@ const User = define("user", {
     primaryKey: true,
   },
 
-  name: {
+  game_name: {
     type: STRING,
     allowNull: false,
   },
 
-  email: {
+  genre: {
     type: STRING,
     allowNull: false,
-    unique: true,
-  },
-
-  password: {
-    type: STRING,
-    allowNull: false,
+    unique: false,
   },
 
   createdAt: {
@@ -36,14 +31,4 @@ const User = define("user", {
   },
 });
 
-module.exports = {
-  initialize: (sequelize) => {
-    this.model = sequelize.define("user", User);
-  },
-
-  createUser: (user) => {
-    return this.model.create(user);
-  },
-};
-
-export default User;
+export default Game;
